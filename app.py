@@ -1,26 +1,3 @@
-"""
-UK Road Casualty Statistics 2025 — Advanced Analytics Dashboard
-COM 763 Advanced Machine Learning — Portfolio Task 1
-
-HOW TO RUN:
-  1. Place this file in a folder together with:
-       - dft-road-casualty-statistics-casualty-provisional-2025.csv
-       - dft-road-casualty-statistics-collision-provisional-2025.csv
-       - dft-road-casualty-statistics-vehicle-provisional-2025.csv
-       - artifacts/scaler.pkl
-       - artifacts/model_logistic_regression.pkl
-       - artifacts/model_random_forest.pkl
-       - artifacts/model_gradient_boosting.pkl
-       - artifacts/model_k_nearest_neighbours.pkl
-       - artifacts/kmeans_model.pkl
-       - artifacts/pca_model.pkl
-       - artifacts/metadata.json
-  2. pip install streamlit plotly pandas numpy scikit-learn joblib
-  3. streamlit run app.py
-
-Models are PRE-TRAINED in the Jupyter notebook (UK_Road_Casualty_ML_Pipeline.ipynb)
-and saved as .pkl files. This app only LOADS them — no training at runtime.
-"""
 
 import streamlit as st
 import pandas as pd
@@ -32,9 +9,9 @@ import json
 import warnings
 warnings.filterwarnings("ignore")
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # PAGE CONFIG
-# ─────────────────────────────────────────────────────────────────────────────
+
 st.set_page_config(
     page_title="UK Road Casualty Analytics 2025",
     layout="wide",
@@ -88,9 +65,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # LOOKUP DICTIONARIES
-# ─────────────────────────────────────────────────────────────────────────────
+
 SEVERITY_MAP   = {1:"Fatal", 2:"Serious", 3:"Slight", -1:"Unknown"}
 WEATHER_MAP    = {1:"Fine no wind", 2:"Raining no wind", 3:"Snowing no wind",
                   4:"Fine + wind",  5:"Raining + wind",  6:"Snowing + wind",
@@ -134,9 +111,9 @@ MODEL_FILES = {
     "K-Nearest Neighbours": "artifacts/model_k_nearest_neighbours.pkl",
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # LOAD ARTIFACTS (pkl + metadata)
-# ─────────────────────────────────────────────────────────────────────────────
+
 @st.cache_resource(show_spinner="Loading pre-trained models...")
 def load_artifacts():
     with open("artifacts/metadata.json") as f:
@@ -152,16 +129,16 @@ meta, scaler, models, kmeans_model, pca_model = load_artifacts()
 FEAT_COLS  = meta["feat_cols"]
 ml_results = meta["results"]
 
-# 🔥 Force Random Forest as best model (override metadata)
+
 best_name = "Random Forest"
 
-# ✅ Safety check (in case model missing)
+
 if best_name not in models:
     st.error(f"{best_name} model not found. Falling back to metadata best model.")
     best_name = meta["best_model"]
-# ─────────────────────────────────────────────────────────────────────────────
+
 # LOAD RAW DATA
-# ─────────────────────────────────────────────────────────────────────────────
+
 @st.cache_data(show_spinner="Loading datasets...")
 def load_data():
     cas = pd.read_csv("dft-road-casualty-statistics-casualty-provisional-2025.csv",  low_memory=False)
@@ -196,9 +173,9 @@ def load_data():
 
 col_df, cas_df, veh_df = load_data()
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # SIDEBAR
-# ─────────────────────────────────────────────────────────────────────────────
+
 with st.sidebar:
     st.markdown("## UK Road Casualty 2025")
     st.markdown("*Jan – May 2025 | DfT Provisional Data*")
@@ -236,9 +213,9 @@ def apply_filters(df):
 
 fdf = apply_filters(col_df)
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # HELPERS
-# ─────────────────────────────────────────────────────────────────────────────
+
 def card(val, label, color=""):
     return f'<div class="metric-card {color}"><h2>{val}</h2><p>{label}</p></div>'
 
@@ -262,9 +239,9 @@ def predict_input(feat_vals):
     return pred, prob
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 1 — OVERVIEW & KPIs
-# ═════════════════════════════════════════════════════════════════════════════
+
 if page == "Overview & KPIs":
     st.title("UK Road Casualty Analytics — 2025 Provisional")
     st.markdown("*Jan – May 2025 | DfT Provisional release*")
@@ -331,9 +308,9 @@ if page == "Overview & KPIs":
     insight("Rural roads account for disproportionately high fatalities despite lower total collision volumes — higher speeds and longer emergency response times drive this disparity.")
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 2 — DATA PIPELINE & FEATURE ENGINEERING
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Data Pipeline & Feature Engineering":
     st.title("Data Pipeline & Feature Engineering")
     st.markdown("Complete step-by-step walkthrough of every data preparation decision. ")
@@ -509,9 +486,8 @@ elif page == "Data Pipeline & Feature Engineering":
 
 
 
-# ═════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — TEMPORAL ANALYSIS
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Temporal Analysis":
     st.title("Temporal Analysis")
 
@@ -587,9 +563,9 @@ elif page == "Temporal Analysis":
         st.plotly_chart(fig, use_container_width=True)
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 4 — GEOSPATIAL & ENVIRONMENT
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Geospatial & Environment":
     st.title("Geospatial & Environmental Analysis")
 
@@ -701,9 +677,9 @@ elif page == "Geospatial & Environment":
         warn("70mph roads carry a fatal rate 4-6x higher than 30mph roads despite better road design.")
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 5 — CASUALTY & VEHICLE PROFILES
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Casualty & Vehicle Profiles":
     st.title("Casualty & Vehicle Profiles")
 
@@ -796,9 +772,9 @@ elif page == "Casualty & Vehicle Profiles":
         insight("Bimodal driver age risk: young (17-25) and elderly (70+) show elevated serious/fatal rates. Middle-aged (35-55) are safest.")
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 6 — RISK FACTOR ANALYSIS
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Risk Factor Analysis":
     st.title("Risk Factor Analysis — Hidden Trends")
 
@@ -902,9 +878,9 @@ elif page == "Risk Factor Analysis":
             st.plotly_chart(fig, use_container_width=True)
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 7 — CLUSTERING ANALYSIS
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Clustering Analysis":
     st.title("Unsupervised Learning — K-Means Clustering")
     st.markdown(
@@ -1119,9 +1095,8 @@ elif page == "Clustering Analysis":
         st.plotly_chart(fig, use_container_width=True)
 
 
-# ═════════════════════════════════════════════════════════════════════════════
 # PAGE 8 — ML PIPELINE & MODEL COMPARISON
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "ML Pipeline & Model Comparison":
     st.title("ML Pipeline — Severity Classification")
     st.markdown(
@@ -1223,9 +1198,9 @@ elif page == "ML Pipeline & Model Comparison":
             f"across all interpretable models.")
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+
 # PAGE 8 — PREDICT & EXPLAIN
-# ═════════════════════════════════════════════════════════════════════════════
+
 elif page == "Predict & Explain":
     st.title("Predict Collision Severity & Interpret")
     
